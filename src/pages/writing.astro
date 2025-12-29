@@ -57,21 +57,58 @@ const articles = [
   }
 ];
 
-// Talks and presentations
+// Talks and webinars
 const talks = [
   {
+    title: "Observability in the Open: OTel for Public Sector",
+    event: "Elastic Webinar",
+    date: "2025-04",
+    url: "https://www.elastic.co/virtual-events/opentelemetry-in-public-sector-using-elastic"
+  },
+  {
+    title: "Transform Your Systems with No-Compromise Observability",
+    event: "Elastic + Foundry Research Webinar",
+    date: "2024",
+    url: "https://www.elastic.co/virtual-events/no-compromise-observability"
+  },
+  {
+    title: "The Next Generation of Observability: Leveraging LLMs and Generative AI",
+    event: "Elastic + Microsoft Webinar",
+    date: "2024-09",
+    url: "https://www.elastic.co/virtual-events/microsoft-observability-llm-gai"
+  },
+  {
+    title: "Why SREs Need AI and ML for Observability and IT Resilience",
+    event: "Elastic + AWS Webinar",
+    date: "2024",
+    url: "https://www.elastic.co/virtual-events/aws-observability-ai-ml-resilience"
+  },
+  {
+    title: "Why You Need AIOps as Part of Your Observability Strategy",
+    event: "Elastic Webinar",
+    date: "2024-01",
+    url: "https://www.elastic.co/virtual-events/why-you-need-aiops"
+  },
+  {
+    title: "The Impact of AIOps and GenAI on Modern Observability",
+    event: "Elastic Webinar",
+    date: "2023-12",
+    url: "https://www.elastic.co/virtual-events/aiops-generative-ai-powered-operations"
+  },
+  {
     title: "Transcending Observability: A Dive into the Future of Logging with OpenTelemetry",
-    event: "DevOpsDays Buffalo 2023",
-    url: "https://devopsdays.org/events/2023-buffalo/speakers/david-hope/"
+    event: "DevOpsDays Buffalo",
+    date: "2023",
+    url: "https://devopsdays.org/events/2023-buffalo/program/david-hope/"
   }
 ];
 ---
 
-<Base title="Writing | David George Hope">
+<Base title="Publications | David George Hope">
   <section class="writing-page">
-    <h1>Writing</h1>
+    <h1>Publications</h1>
     <p class="intro">
-      Articles, notes, and talks on observability, OpenTelemetry, and building things that work.
+      Articles, talks, and webinars on observability, OpenTelemetry, AIOps, and building things that work.
     </p>
 
     <h2>Notes</h2>
@@ -87,7 +124,7 @@ const talks = [
       ))}
     </ul>
 
-    <h2>Published Articles</h2>
+    <h2>Articles</h2>
     <ul class="posts external">
       {articles.map((article) => (
         <li>
@@ -105,11 +142,12 @@ const talks = [
       More on <a href="https://www.elastic.co/blog/author/david-hope">Elastic Blog</a> and <a href="https://www.elastic.co/observability-labs/author/david-hope">Observability Labs</a>
     </p>
 
-    <h2>Talks</h2>
+    <h2>Talks & Webinars</h2>
     <ul class="posts talks">
       {talks.map((talk) => (
         <li>
           <a href={talk.url} target="_blank" rel="noopener noreferrer">
+            <span class="date">{talk.date}</span>
             <span class="title">{talk.title}</span>
             <span class="external-icon">&#8599;</span>
           </a>
@@ -188,16 +226,8 @@ const talks = [
     margin-left: 4.75rem;
   }
 
-  .posts.talks a {
-    gap: 0.5rem;
-  }
-
   .posts.talks .title {
-    flex: none;
-  }
-
-  .posts.talks p {
-    margin-left: 0;
+    flex: 1;
   }
 
   .more-links {
