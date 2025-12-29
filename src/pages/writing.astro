@@ -1,0 +1,109 @@
+---
+import Base from '../layouts/Base.astro';
+
+// You can add posts here or use Astro's content collections later
+const posts = [
+  // {
+  //   title: "Example Post",
+  //   date: "2024-01-15",
+  //   description: "A short description of the post.",
+  //   slug: "example-post"
+  // }
+];
+---
+
+<Base title="Writing | David George Hope">
+  <section class="writing-page">
+    <h1>Writing</h1>
+    <p class="intro">
+      Notes and thoughts that aren't work. For observability content, see the
+      <a href="https://www.elastic.co/blog/author/david-hope">Elastic blog</a>.
+    </p>
+
+    {posts.length > 0 ? (
+      <ul class="posts">
+        {posts.map((post) => (
+          <li>
+            <a href={`/writing/${post.slug}`}>
+              <span class="date">{post.date}</span>
+              <span class="title">{post.title}</span>
+            </a>
+            <p>{post.description}</p>
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <div class="empty">
+        <p>Nothing here yet.</p>
+      </div>
+    )}
+  </section>
+</Base>
+
+<style>
+  .writing-page {
+    padding: 2rem 0;
+  }
+
+  h1 {
+    margin-bottom: 0.5rem;
+  }
+
+  .intro {
+    color: var(--color-text-muted);
+    margin-bottom: 2rem;
+  }
+
+  .posts {
+    list-style: none;
+  }
+
+  .posts li {
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .posts li:last-child {
+    border-bottom: none;
+  }
+
+  .posts a {
+    display: flex;
+    gap: 1rem;
+    align-items: baseline;
+    margin-bottom: 0.25rem;
+  }
+
+  .posts .date {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  .posts .title {
+    color: var(--color-text);
+    font-weight: 500;
+  }
+
+  .posts p {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-left: calc(4rem + 1rem);
+  }
+
+  .empty {
+    padding: 3rem 0;
+    text-align: center;
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 600px) {
+    .posts a {
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .posts p {
+      margin-left: 0;
+    }
+  }
+</style>

@@ -1,0 +1,50 @@
+[
+  {
+    "title": "OpenTelemetry Demo Generator",
+    "description": "Generate realistic telemetry data for demos and testing observability pipelines.",
+    "url": "https://github.com/davidgeorgehope/otel-demo-gen",
+    "tags": ["OpenTelemetry", "Observability"]
+  },
+  {
+    "title": "Voice Coding for Steam Deck",
+    "description": "Voice-activated Claude assistant with push-to-talk and Whisper transcription.",
+    "url": "https://github.com/davidgeorgehope/voicecoding",
+    "tags": ["AI", "Hardware"]
+  },
+  {
+    "title": "ChatGPT Monitoring with OTel",
+    "description": "Monitor ChatGPT API usage with OpenTelemetry instrumentation and dashboards.",
+    "url": "https://github.com/davidgeorgehope/ChatGPTMonitoringWithOtel",
+    "tags": ["OpenTelemetry", "AI"]
+  },
+  {
+    "title": "Custom Instrumentation Examples",
+    "description": "Examples of custom OpenTelemetry instrumentation in Java applications.",
+    "url": "https://github.com/davidgeorgehope/custom-instrumentation-examples",
+    "tags": ["OpenTelemetry", "Java"]
+  },
+  {
+    "title": "OTel Collector Syslog",
+    "description": "OpenTelemetry collector configuration for syslog ingestion.",
+    "url": "https://github.com/davidgeorgehope/otel-collector-syslog",
+    "tags": ["OpenTelemetry", "Infrastructure"]
+  },
+  {
+    "title": "LogGuid",
+    "description": "Make transaction parent GUIDs available in log files for correlation.",
+    "url": "https://github.com/davidgeorgehope/LogGuid",
+    "tags": ["Observability", "Java"]
+  },
+  {
+    "title": "Python Elastic APM Example",
+    "description": "Example Flask application with Elastic APM instrumentation.",
+    "url": "https://github.com/davidgeorgehope/PythonElasticAPMExample",
+    "tags": ["Elastic", "Python"]
+  },
+  {
+    "title": "OTel Finance Demo",
+    "description": "Financial services demo application with OpenTelemetry observability.",
+    "url": "https://github.com/davidgeorgehope/otel-finance",
+    "tags": ["OpenTelemetry", "Demo"]
+  }
+]

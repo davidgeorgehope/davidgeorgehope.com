@@ -1,0 +1,141 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "David George Hope",
+  description = "Director of Product Marketing for Observability at Elastic. Builder of things."
+} = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>{title}</title>
+  </head>
+  <body>
+    <nav class="nav">
+      <a href="/" class="nav-home">DGH</a>
+      <div class="nav-links">
+        <a href="/projects">Projects</a>
+        <a href="/writing">Writing</a>
+      </div>
+    </nav>
+    <main>
+      <slot />
+    </main>
+    <footer>
+      <p>&copy; {new Date().getFullYear()} David George Hope</p>
+    </footer>
+  </body>
+</html>
+
+<style is:global>
+  :root {
+    --color-bg: #faf9f7;
+    --color-text: #2c2c2c;
+    --color-text-muted: #666;
+    --color-accent: #5c4d3c;
+    --color-border: #e0ddd8;
+    --color-card-bg: #fff;
+    --font-body: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    --font-mono: 'SF Mono', SFMono-Regular, Consolas, monospace;
+    --max-width: 800px;
+    --spacing: 1.5rem;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    font-size: 18px;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--color-bg);
+    color: var(--color-text);
+    line-height: 1.6;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: var(--max-width);
+    margin: 0 auto;
+    padding: var(--spacing);
+  }
+
+  a {
+    color: var(--color-accent);
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  h1, h2, h3 {
+    font-weight: 500;
+    line-height: 1.3;
+  }
+
+  h1 { font-size: 1.75rem; }
+  h2 { font-size: 1.35rem; }
+  h3 { font-size: 1.1rem; }
+
+  .nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--spacing);
+    max-width: var(--max-width);
+    margin: 0 auto;
+    width: 100%;
+  }
+
+  .nav-home {
+    font-weight: 600;
+    font-size: 1.1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 1.5rem;
+  }
+
+  .nav-links a {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+
+  .nav-links a:hover {
+    color: var(--color-text);
+  }
+
+  footer {
+    padding: calc(var(--spacing) * 2) var(--spacing);
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+  }
+
+  @media (max-width: 600px) {
+    html { font-size: 16px; }
+    .nav { padding: 1rem; }
+    main { padding: 1rem; }
+  }
+</style>
