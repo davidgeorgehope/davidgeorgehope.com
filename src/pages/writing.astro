@@ -4,6 +4,12 @@ import Base from '../layouts/Base.astro';
 // Personal posts (on this site)
 const posts = [
   {
+    title: "LLMs Keep Hallucinating My URLs (So I Built a Fix)",
+    date: "2025-12",
+    description: "Claude generated plausible-looking URLs that didn't exist. Here's the architectural problem and a hook-based solution.",
+    slug: "llm-url-hallucination"
+  },
+  {
     title: "Why I Build Things",
     date: "2025-12",
     description: "On strange careers, Quaker meeting houses, and the feeling of making something work.",
@@ -17,43 +23,43 @@ const articles = [
     title: "The hidden costs of tool sprawl: An SRE's guide to observability consolidation",
     date: "2025-04",
     publication: "Elastic Blog",
-    url: "https://www.elastic.co/blog/sre-guide-observability-tool-sprawl-consolidation"
+    url: "https://www.elastic.co/blog/guide-observability-consolidation"
   },
   {
     title: "Realizing the business value of OpenTelemetry-native observability",
     date: "2025-01",
     publication: "Elastic Blog",
-    url: "https://www.elastic.co/blog/business-value-opentelemetry-native-observability"
+    url: "https://www.elastic.co/blog/opentelemetry-native-observability-business-value"
   },
   {
     title: "The evolving role of SREs: Balancing reliability, cost, and innovation",
     date: "2024-12",
     publication: "Elastic Blog",
-    url: "https://www.elastic.co/blog/evolving-role-sres-reliability-cost-innovation"
+    url: "https://www.elastic.co/blog/site-reliability-engineer-role-evolution"
   },
   {
     title: "Leveling up your observability practice — Part 2",
     date: "2024-11",
     publication: "Elastic Blog",
-    url: "https://www.elastic.co/blog/leveling-up-observability-practice-part-2"
+    url: "https://www.elastic.co/blog/observability-maturity-lessons-leadership-part2"
   },
   {
     title: "Leveling up your observability practice — Part 1",
     date: "2024-11",
     publication: "Elastic Blog",
-    url: "https://www.elastic.co/blog/leveling-up-observability-practice-part-1"
+    url: "https://www.elastic.co/blog/observability-maturity-lessons-benefits-part1"
   },
   {
     title: "The power of effective log management in software development and operations",
     date: "2023-09",
     publication: "Elastic Blog",
-    url: "https://www.elastic.co/blog/effective-log-management-software-development-operations"
+    url: "https://www.elastic.co/blog/log-management-observability-operations"
   },
   {
     title: "A look under the hood at eBPF: A new way to monitor and secure your platforms",
     date: "2022-11",
     publication: "Elastic Blog",
-    url: "https://www.elastic.co/blog/what-is-ebpf"
+    url: "https://www.elastic.co/blog/ebpf-observability-security-workload-profiling"
   }
 ];
 
@@ -90,7 +96,7 @@ const talks = [
     url: "https://www.elastic.co/virtual-events/why-you-need-aiops"
   },
   {
-    title: "The Impact of AIOps and GenAI on Modern Observability",
+    title: "Using AIOps, GAI, and Observability for Higher Performing Applications",
     event: "Elastic Webinar",
     date: "2023-12",
     url: "https://www.elastic.co/virtual-events/aiops-generative-ai-powered-operations"

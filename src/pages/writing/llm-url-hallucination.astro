@@ -1,0 +1,236 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const title = "LLMs Keep Hallucinating My URLs (So I Built a Fix)";
+const date = "December 2025";
+---
+
+<Base title={`${title} | David George Hope`}>
+  <article class="post">
+    <header>
+      <time>{date}</time>
+      <h1>{title}</h1>
+    </header>
+
+    <div class="content">
+      <p>
+        I asked Claude to build me a publications page with links to my articles. It did a great job—clean layout, nice organization, even got the article titles right. But every single URL was wrong.
+      </p>
+
+      <p>
+        Not broken. <em>Wrong</em>. The URLs looked plausible. They followed Elastic's URL patterns. They just didn't exist. Claude had hallucinated them.
+      </p>
+
+      <p>
+        This is a known problem with LLMs, but it's particularly annoying with URLs because they're so easy to get wrong and so hard to notice. A hallucinated URL looks exactly like a real one until you click it and get a 404.
+      </p>
+
+      <h2>The Problem</h2>
+
+      <p>
+        Here's what happened. I asked Claude Code (the CLI tool I use for development) to create a page listing my Elastic blog posts. Claude knew I had written articles. It even knew the titles. But it didn't have the actual URLs—so it generated plausible-looking ones based on patterns it had seen in training data.
+      </p>
+
+      <p>
+        My article "The hidden costs of tool sprawl" became <code>/blog/sre-guide-observability-tool-sprawl-consolidation</code>. The real URL? <code>/blog/guide-observability-consolidation</code>. Close, but not close enough.
+      </p>
+
+      <p>
+        The frustrating part: Claude has web search. It could have looked up the real URLs. But the model generates tokens probabilistically—it doesn't "know" when it's making up a URL versus remembering one. It just predicts the next token based on context.
+      </p>
+
+      <h2>Why This Is Architecturally Interesting</h2>
+
+      <p>
+        I started thinking about fixes. The obvious one—validate URLs after generation—has a problem: the output still routes through the LLM. Even if you validate and tell the model "that URL is wrong," it might hallucinate a different wrong URL in response.
+      </p>
+
+      <p>
+        The deeper issue is that LLMs generate text, not references. When you ask for a URL, the model doesn't look up a fact and return it—it predicts what characters would come next in a plausible response. That's fundamentally different from retrieval.
+      </p>
+
+      <p>
+        There are a few architectural approaches that actually work:
+      </p>
+
+      <ol>
+        <li><strong>Structured references</strong>: The model outputs citation indices like <code>[source:3]</code>, and a post-processor maps those to actual URLs from search results. The LLM never generates the URL string itself.</li>
+        <li><strong>Two-phase workflow</strong>: First search for real URLs, store them in a reference file, then generate content using only URLs from that file.</li>
+        <li><strong>Output validation as a filter</strong>: Validate URLs in the final output and strip or flag invalid ones—without feeding corrections back to the model.</li>
+      </ol>
+
+      <h2>The Solution: A Claude Code Hook</h2>
+
+      <p>
+        I went with option 3. <a href="https://code.claude.com/docs/en/hooks">Claude Code supports hooks</a>—shell commands that execute at specific points in the agent's lifecycle. There are hooks for before/after tool calls, when sessions start, when Claude stops responding, and more. They're an official extension mechanism, and they provide something crucial: deterministic behavior in a probabilistic system.
+      </p>
+
+      <p>
+        I wrote a hook that fires after any file write, extracts URLs, and validates them via HTTP HEAD requests.
+      </p>
+
+      <p>
+        If any URL returns a 404 (or fails to connect), the hook fails with an error message listing the broken links. Claude sees the error, searches for the real URLs, and fixes the file.
+      </p>
+
+      <p>
+        The key insight: the validation doesn't re-inject into the model's generation. It just blocks the bad output and provides feedback. The model then has to do the work of finding correct URLs—which it's actually good at when forced to search.
+      </p>
+
+      <pre><code># The hook validates URLs in .html, .astro, .md files
+# Extracts URLs with grep, checks each with curl
+# Fails if any return 4xx/5xx
+
+if [ -n "&#36;BROKEN_URLS" ]; then
+    echo "URL VALIDATION FAILED"
+    echo "Found &#36;FAILED broken URL(s) in &#36;FILE_PATH:"
+    echo -e "&#36;BROKEN_URLS"
+    echo "Please search for the correct URLs."
+    exit 1
+fi</code></pre>
+
+      <h2>Does It Work?</h2>
+
+      <p>
+        Yes. After I set up the hook, I asked Claude to add some links. It generated hallucinated URLs (old habits), the hook caught them, and Claude then searched for the real URLs and fixed the file. The feedback loop works.
+      </p>
+
+      <p>
+        It's not perfect. The hook runs after generation, so there's still wasted work. A better solution would enforce URL sourcing upfront—requiring the model to search before including any external link. But this catches the problem, and catching it is most of the battle.
+      </p>
+
+      <h2>The Broader Point</h2>
+
+      <p>
+        LLMs are good at a lot of things, but factual retrieval of arbitrary strings isn't one of them. URLs, phone numbers, API keys, specific version numbers—anything that's essentially a random string with no semantic structure—is going to be unreliable.
+      </p>
+
+      <p>
+        The fix isn't to hope the model gets better at memorizing. It's to architect around the limitation: use structured references, enforce validation, separate generation from retrieval.
+      </p>
+
+      <p>
+        Or, in the spirit of observability: if you can't trust the output, instrument it. Measure what's actually happening. Add a check that fails loudly when something goes wrong.
+      </p>
+
+      <p>
+        That's basically what this hook does. It's observability for LLM outputs.
+      </p>
+
+      <h2>Try It Yourself</h2>
+
+      <p>
+        If you use Claude Code, you can add this hook to your project. Create <code>.claude/settings.json</code>:
+      </p>
+
+      <pre><code>{'{'}
+  "hooks": {'{'}
+    "PostToolUse": [
+      {'{'}
+        "matcher": "Edit|Write",
+        "command": ".claude/hooks/validate-urls.sh"
+      {'}'}
+    ]
+  {'}'}
+{'}'}</code></pre>
+
+      <p>
+        Then add the validation script at <code>.claude/hooks/validate-urls.sh</code>. The full implementation is in this site's repo if you want to grab it.
+      </p>
+
+      <p>
+        The nice thing about hooks is they run automatically. You don't have to remember to validate—the tool does it for you. Which is exactly how guardrails should work.
+      </p>
+    </div>
+
+    <footer class="post-footer">
+      <a href="/writing">&larr; Back to writing</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .post {
+    padding: 2rem 0;
+    max-width: 640px;
+  }
+
+  header {
+    margin-bottom: 2rem;
+  }
+
+  header time {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  header h1 {
+    margin-top: 0.5rem;
+  }
+
+  .content {
+    line-height: 1.7;
+  }
+
+  .content p {
+    margin-bottom: 1.25rem;
+  }
+
+  .content a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .content h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+  }
+
+  .content ol {
+    margin-bottom: 1.25rem;
+    padding-left: 1.5rem;
+  }
+
+  .content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+  }
+
+  .content code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--color-surface);
+    padding: 0.15em 0.3em;
+    border-radius: 3px;
+  }
+
+  .content pre {
+    background: var(--color-surface);
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin-bottom: 1.25rem;
+  }
+
+  .content pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.85rem;
+  }
+
+  .post-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .post-footer a {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .post-footer a:hover {
+    color: var(--color-text);
+  }
+</style>
