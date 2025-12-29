@@ -1,0 +1,286 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const title = "Session Replay is a Band-Aid (And AI Can Do Better)";
+const date = "December 2025";
+---
+
+<Base title={`${title} | David George Hope`}>
+  <article class="post">
+    <header>
+      <time>{date}</time>
+      <h1>{title}</h1>
+    </header>
+
+    <div class="content">
+      <p>
+        Session replay tools like FullStory, LogRocket, and Hotjar have become standard in frontend observability. The pitch is compelling: record everything users do, replay it like a video when something goes wrong. Finally, you can see exactly what happened.
+      </p>
+
+      <p>
+        But after years of working with observability tools, I've come to believe session replay is solving the right problem with the wrong approach. It's a band-aid on a deeper architectural gap. And now that we have AI, we can do something fundamentally better.
+      </p>
+
+      <h2>The Problem Session Replay Tries to Solve</h2>
+
+      <p>
+        Session replay exists because of a fundamental visibility gap: <em>when a user reports something broke, we have no idea what actually happened from their perspective.</em>
+      </p>
+
+      <p>
+        Think about how debugging usually goes. User says "checkout didn't work." Support asks for details. User says "I clicked the button and nothing happened." That's all you get. No browser version. No error messages. No sequence of actions. No state.
+      </p>
+
+      <p>
+        Server logs show the API call failed with a 500, but not <em>why</em> the user made that call, what they saw before it, or how they reacted after. Traditional logging captures the backend but leaves the frontend as a black box.
+      </p>
+
+      <p>
+        Session replay promises to fill this gap. Record the DOM, capture mouse movements, replay it all later. See what the user saw. Problem solved, right?
+      </p>
+
+      <h2>Why It's a Band-Aid</h2>
+
+      <p>
+        Session replay works by recording DOM mutations and reconstructing a video-like playback. It captures <em>pixels</em>, not <em>meaning</em>. And that distinction matters more than it seems.
+      </p>
+
+      <p>
+        <strong>Privacy is a nightmare.</strong> You're recording everything. Every form field, every personal detail, every sensitive piece of data that appears on screen. Yes, you can mask PII, but masking is fragile. Miss one field and you've recorded someone's SSN. The regulatory overhead alone makes this approach expensive.
+      </p>
+
+      <p>
+        <strong>Storage explodes.</strong> DOM diffs for every session across every user adds up to terabytes fast. You're storing massive amounts of data "just in case" someone reports a bug. The signal-to-noise ratio is terrible.
+      </p>
+
+      <p>
+        <strong>Finding the needle takes forever.</strong> When something goes wrong, you have hours of recordings to search through. Which session matters? Which 10 seconds of that 30-minute session contains the bug? You're watching video hoping to spot the problem.
+      </p>
+
+      <p>
+        <strong>You can't query it.</strong> Session replay is fundamentally a passive consumption experience. You watch. You can't ask "show me all users who rage-clicked on the submit button" or "what percentage of users hesitated on the payment form for more than 30 seconds?" The data exists but it's locked in video format.
+      </p>
+
+      <p>
+        <strong>It's siloed from your APM.</strong> The recording shows what happened on the frontend, but it doesn't connect to your backend traces. You see the user click a button, but correlating that to the specific API call, the database query, the error in your logs—that's manual detective work.
+      </p>
+
+      <h2>What Would "Better" Look Like?</h2>
+
+      <p>
+        Here's the question I've been thinking about: now that we have AI, what would we build if we were starting from scratch?
+      </p>
+
+      <p>
+        The insight is that we don't actually need video. We need <em>understanding</em>. Instead of recording DOM mutations, what if we captured semantically rich events and let AI synthesize the story?
+      </p>
+
+      <p>
+        Instead of watching a 45-minute recording hoping to find the bug, you ask: <em>"What happened to user David Hope on the checkout page?"</em>
+      </p>
+
+      <p>
+        And AI responds:
+      </p>
+
+      <blockquote>
+        David loaded checkout at 14:32. He filled the form correctly but hesitated 45 seconds on the payment section. He clicked "Submit" 6 times in rapid succession—classic rage clicking. The Stripe API returned a 402 (card declined) but your frontend swallowed the error. The user saw nothing. He refreshed twice, then abandoned. Backend trace ID: abc123.
+      </blockquote>
+
+      <p>
+        That's not a recording. That's a narrative synthesized from structured data. And it's more useful than any video.
+      </p>
+
+      <h2>The Instrumentation This Requires</h2>
+
+      <p>
+        To make this work, you need to capture <em>meaning</em>, not pixels. Instead of "click at coordinates (342, 891)", you capture "user clicked the Submit Order button in the CheckoutForm component."
+      </p>
+
+      <p>
+        The events look something like this:
+      </p>
+
+      <pre><code>{'{'}
+  "event": "user.interaction",
+  "action": "click",
+  "target": {'{'}
+    "semantic_name": "Submit Order",
+    "component": "CheckoutForm",
+    "element": "button#submit"
+  {'}'},
+  "frustration_signals": {'{'}
+    "rapid_clicks": 6,
+    "time_since_page_load": 45000
+  {'}'},
+  "trace_id": "abc123",
+  "session_id": "...",
+  "user": {"{'}'} "id": "david.hope" {'}'}
+{'}'}</code></pre>
+
+      <p>
+        You also capture the signals that session replay <em>shows</em> but doesn't <em>understand</em>:
+      </p>
+
+      <ul>
+        <li><strong>Rage clicks</strong>: Multiple rapid clicks on the same element (frustration)</li>
+        <li><strong>Dead clicks</strong>: Clicks on non-interactive elements (user expected something)</li>
+        <li><strong>Thrashing</strong>: Rapid scrolling up and down (user is lost)</li>
+        <li><strong>Form hesitation</strong>: Long pauses on form fields (confusion or context-switching)</li>
+        <li><strong>Error blindness</strong>: User continues after an error they didn't notice</li>
+      </ul>
+
+      <p>
+        The key difference: these become queryable, structured data. Not pixels in a video.
+      </p>
+
+      <h2>Why OTLP and Elastic?</h2>
+
+      <p>
+        Here's where it gets practical. This approach works naturally with OpenTelemetry and existing APM infrastructure.
+      </p>
+
+      <p>
+        OTLP (OpenTelemetry Protocol) already supports traces, metrics, and logs. Frontend events are just another signal type. You instrument the browser with OTEL's browser SDK plus custom semantic instrumentation, send via OTLP, and land in Elastic alongside your backend traces.
+      </p>
+
+      <p>
+        The magic: that <code>trace_id</code> field connects the frontend interaction to the backend request. When AI narrates "the Stripe API returned 402," it's pulling that from the linked backend span. No manual correlation needed.
+      </p>
+
+      <p>
+        Elastic gives you the query engine. AI gives you the interface. The same infrastructure you use for APM now powers intelligent session understanding.
+      </p>
+
+      <h2>What I'm Building</h2>
+
+      <p>
+        I've started prototyping this. A browser instrumentation layer that captures semantic events with frustration signals. An OTLP pipeline to Elastic. And an AI layer that can answer questions about user sessions.
+      </p>
+
+      <p>
+        It's early. But the core thesis is working: structured semantic events + AI synthesis is more powerful than DOM recording + video playback.
+      </p>
+
+      <p>
+        I'll write more as this progresses. Building in public, as they say.
+      </p>
+
+      <h2>The Bigger Point</h2>
+
+      <p>
+        Session replay was a clever solution for its time. When you couldn't understand what users experienced, recording everything and playing it back was better than nothing.
+      </p>
+
+      <p>
+        But "record everything" is a brute-force approach. It trades storage and privacy for visibility. It gives you data but not understanding.
+      </p>
+
+      <p>
+        With AI, we can be smarter. Capture meaning. Let the AI synthesize. Ask questions instead of watching video. Connect frontend to backend through traces, not screenshots.
+      </p>
+
+      <p>
+        That's not an incremental improvement on session replay. It's a different architecture for the same problem. And I think it's the right one.
+      </p>
+    </div>
+
+    <footer class="post-footer">
+      <a href="/writing">&larr; Back to writing</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .post {
+    padding: 2rem 0;
+    max-width: 640px;
+  }
+
+  header {
+    margin-bottom: 2rem;
+  }
+
+  header time {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  header h1 {
+    margin-top: 0.5rem;
+  }
+
+  .content {
+    line-height: 1.7;
+  }
+
+  .content p {
+    margin-bottom: 1.25rem;
+  }
+
+  .content a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .content h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+  }
+
+  .content ul {
+    margin-bottom: 1.25rem;
+    padding-left: 1.5rem;
+  }
+
+  .content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+  }
+
+  .content code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--color-surface);
+    padding: 0.15em 0.3em;
+    border-radius: 3px;
+  }
+
+  .content pre {
+    background: var(--color-surface);
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin-bottom: 1.25rem;
+  }
+
+  .content pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.85rem;
+  }
+
+  .content blockquote {
+    border-left: 3px solid var(--color-border);
+    padding-left: 1rem;
+    margin: 1.25rem 0;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
+  .post-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .post-footer a {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .post-footer a:hover {
+    color: var(--color-text);
+  }
+</style>
