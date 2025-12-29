@@ -1,12 +1,68 @@
 ---
 import Base from '../layouts/Base.astro';
 
+// Personal posts (on this site)
 const posts = [
   {
     title: "Why I Build Things",
-    date: "2024-12",
+    date: "2025-12",
     description: "On strange careers, Quaker meeting houses, and the feeling of making something work.",
     slug: "why-i-build-things"
+  }
+];
+
+// Published articles (external)
+const articles = [
+  {
+    title: "The hidden costs of tool sprawl: An SRE's guide to observability consolidation",
+    date: "2025-04",
+    publication: "Elastic Blog",
+    url: "https://www.elastic.co/blog/sre-guide-observability-tool-sprawl-consolidation"
+  },
+  {
+    title: "Realizing the business value of OpenTelemetry-native observability",
+    date: "2025-01",
+    publication: "Elastic Blog",
+    url: "https://www.elastic.co/blog/business-value-opentelemetry-native-observability"
+  },
+  {
+    title: "The evolving role of SREs: Balancing reliability, cost, and innovation",
+    date: "2024-12",
+    publication: "Elastic Blog",
+    url: "https://www.elastic.co/blog/evolving-role-sres-reliability-cost-innovation"
+  },
+  {
+    title: "Leveling up your observability practice — Part 2",
+    date: "2024-11",
+    publication: "Elastic Blog",
+    url: "https://www.elastic.co/blog/leveling-up-observability-practice-part-2"
+  },
+  {
+    title: "Leveling up your observability practice — Part 1",
+    date: "2024-11",
+    publication: "Elastic Blog",
+    url: "https://www.elastic.co/blog/leveling-up-observability-practice-part-1"
+  },
+  {
+    title: "The power of effective log management in software development and operations",
+    date: "2023-09",
+    publication: "Elastic Blog",
+    url: "https://www.elastic.co/blog/effective-log-management-software-development-operations"
+  },
+  {
+    title: "A look under the hood at eBPF: A new way to monitor and secure your platforms",
+    date: "2022-11",
+    publication: "Elastic Blog",
+    url: "https://www.elastic.co/blog/what-is-ebpf"
+  }
+];
+
+// Talks and presentations
+const talks = [
+  {
+    title: "Transcending Observability: A Dive into the Future of Logging with OpenTelemetry",
+    event: "DevOpsDays Buffalo 2023",
+    url: "https://devopsdays.org/events/2023-buffalo/speakers/david-hope/"
   }
 ];
 ---
@@ -15,27 +71,52 @@ const posts = [
   <section class="writing-page">
     <h1>Writing</h1>
     <p class="intro">
-      Notes and thoughts that aren't work. For observability content, see the
-      <a href="https://www.elastic.co/blog/author/david-hope">Elastic blog</a>.
+      Articles, notes, and talks on observability, OpenTelemetry, and building things that work.
     </p>
 
-    {posts.length > 0 ? (
-      <ul class="posts">
-        {posts.map((post) => (
-          <li>
-            <a href={`/writing/${post.slug}`}>
-              <span class="date">{post.date}</span>
-              <span class="title">{post.title}</span>
-            </a>
-            <p>{post.description}</p>
-          </li>
-        ))}
-      </ul>
-    ) : (
-      <div class="empty">
-        <p>Nothing here yet.</p>
-      </div>
-    )}
+    <h2>Notes</h2>
+    <ul class="posts">
+      {posts.map((post) => (
+        <li>
+          <a href={`/writing/${post.slug}`}>
+            <span class="date">{post.date}</span>
+            <span class="title">{post.title}</span>
+          </a>
+          <p>{post.description}</p>
+        </li>
+      ))}
+    </ul>
+
+    <h2>Published Articles</h2>
+    <ul class="posts external">
+      {articles.map((article) => (
+        <li>
+          <a href={article.url} target="_blank" rel="noopener noreferrer">
+            <span class="date">{article.date}</span>
+            <span class="title">{article.title}</span>
+            <span class="external-icon">&#8599;</span>
+          </a>
+          <p>{article.publication}</p>
+        </li>
+      ))}
+    </ul>
+
+    <p class="more-links">
+      More on <a href="https://www.elastic.co/blog/author/david-hope">Elastic Blog</a> and <a href="https://www.elastic.co/observability-labs/author/david-hope">Observability Labs</a>
+    </p>
+
+    <h2>Talks</h2>
+    <ul class="posts talks">
+      {talks.map((talk) => (
+        <li>
+          <a href={talk.url} target="_blank" rel="noopener noreferrer">
+            <span class="title">{talk.title}</span>
+            <span class="external-icon">&#8599;</span>
+          </a>
+          <p>{talk.event}</p>
+        </li>
+      ))}
+    </ul>
   </section>
 </Base>
 
@@ -48,9 +129,17 @@ const posts = [
     margin-bottom: 0.5rem;
   }
 
+  h2 {
+    margin-top: 2.5rem;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    color: var(--color-text-muted);
+    font-weight: 500;
+  }
+
   .intro {
     color: var(--color-text-muted);
-    margin-bottom: 2rem;
+    margin-bottom: 1rem;
   }
 
   .posts {
@@ -58,7 +147,7 @@ const posts = [
   }
 
   .posts li {
-    padding: 1rem 0;
+    padding: 0.75rem 0;
     border-bottom: 1px solid var(--color-border);
   }
 
@@ -68,31 +157,52 @@ const posts = [
 
   .posts a {
     display: flex;
-    gap: 1rem;
+    gap: 0.75rem;
     align-items: baseline;
-    margin-bottom: 0.25rem;
+    flex-wrap: wrap;
   }
 
   .posts .date {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--color-text-muted);
     font-family: var(--font-mono);
+    min-width: 4rem;
   }
 
   .posts .title {
     color: var(--color-text);
     font-weight: 500;
+    flex: 1;
+  }
+
+  .posts .external-icon {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    margin-left: 0.25rem;
   }
 
   .posts p {
     color: var(--color-text-muted);
-    font-size: 0.9rem;
-    margin-left: calc(4rem + 1rem);
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    margin-left: 4.75rem;
   }
 
-  .empty {
-    padding: 3rem 0;
-    text-align: center;
+  .posts.talks a {
+    gap: 0.5rem;
+  }
+
+  .posts.talks .title {
+    flex: none;
+  }
+
+  .posts.talks p {
+    margin-left: 0;
+  }
+
+  .more-links {
+    margin-top: 1rem;
+    font-size: 0.9rem;
     color: var(--color-text-muted);
   }
 
@@ -100,6 +210,9 @@ const posts = [
     .posts a {
       flex-direction: column;
       gap: 0.25rem;
+    }
+    .posts .date {
+      min-width: auto;
     }
     .posts p {
       margin-left: 0;
