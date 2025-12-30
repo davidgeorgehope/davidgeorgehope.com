@@ -33,8 +33,15 @@ PORT=$(find_open_port)
 
 echo ""
 echo "Starting production server on http://localhost:$PORT"
-echo "Press Ctrl+C to stop"
-echo ""
 
-# Run Astro preview on the found port
-npm run preview -- --port $PORT
+# Run Astro preview in the background
+nohup npm run preview -- --port $PORT --allowed-hosts=davidgeorgehope.com > /tmp/astro-preview.log 2>&1 &
+PID=$!
+
+echo "Server started in background (PID: $PID)"
+echo "Log file: /tmp/astro-preview.log"
+echo ""
+echo "To stop: kill $PID"
+
+# Save PID to file for easy stopping
+echo $PID > /tmp/astro-preview.pid
