@@ -1,0 +1,360 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const title = "Building AI-Native Session Replay with OpenTelemetry";
+const date = "December 2025";
+---
+
+<Base title={`${title} | David George Hope`}>
+  <article class="post">
+    <header>
+      <time>{date}</time>
+      <h1>{title}</h1>
+    </header>
+
+    <div class="content">
+      <p>
+        In my <a href="/writing/session-replay-is-a-band-aid">last post</a>, I argued that traditional session replay is a band-aid: it records pixels instead of meaning, creates privacy nightmares, and can't be queried. I proposed an alternative: capture semantic events, detect frustration signals, and let AI synthesize understanding.
+      </p>
+
+      <p>
+        I've now built the first version. Here's how it works, what I learned, and how you can use it.
+      </p>
+
+      <p>
+        <strong>Code:</strong> <a href="https://github.com/davidgeorgehope/sessionreplay">github.com/davidgeorgehope/sessionreplay</a>
+      </p>
+
+      <h2>The Architecture: Logs + Traces</h2>
+
+      <p>
+        The key insight is using <em>two complementary OTLP signals</em>:
+      </p>
+
+      <ul>
+        <li><strong>Logs</strong> for discrete events: clicks, frustration signals, navigation, errors</li>
+        <li><strong>Traces</strong> for business operations with duration: checkout flows, API calls</li>
+      </ul>
+
+      <p>
+        Why not just traces? Long-lived spans are a known unsolved problem in OpenTelemetry. Spans remain in memory until <code>end()</code> is called. If the browser tab closes before the span ends, that data is lost. The <code>beforeunload</code> event is unreliable (Chrome deprecated <code>unload</code> entirely).
+      </p>
+
+      <p>
+        Logs solve this elegantly: events send immediately via OTLP, no lifecycle management needed. A user click is captured the moment it happens, not when some parent span eventually closes.
+      </p>
+
+      <h2>What Gets Captured</h2>
+
+      <p>
+        Every event includes session and user context automatically:
+      </p>
+
+      <pre><code>{`{
+  "body": "user.click",
+  "attributes": {
+    "session.id": "sess_abc123",
+    "session.sequence": 42,
+    "user.id": "david",
+    "user.email": "david@example.com",
+    "event.category": "user.interaction",
+    "target.semantic_name": "Submit Order",
+    "target.element": "button",
+    "page.url": "https://example.com/checkout"
+  }
+}`}</code></pre>
+
+      <p>
+        Notice <code>target.semantic_name</code>. That's the key difference from traditional session replay. Instead of "click at coordinates (342, 891)", we capture "Submit Order button". Meaning, not pixels.
+      </p>
+
+      <h2>Frustration Detection</h2>
+
+      <p>
+        The agent automatically detects frustration signals that session replay <em>shows</em> but doesn't <em>understand</em>:
+      </p>
+
+      <p>
+        <strong>Rage clicks:</strong> Multiple rapid clicks on the same element. The user expected something to happen and it didn't. Classic broken button scenario.
+      </p>
+
+      <pre><code>{`{
+  "body": "user.frustration.rage_click",
+  "attributes": {
+    "frustration.type": "rage_click",
+    "frustration.score": 0.8,
+    "frustration.click_count": 6,
+    "frustration.duration_ms": 850,
+    "target.semantic_name": "Submit Order"
+  }
+}`}</code></pre>
+
+      <p>
+        <strong>Dead clicks:</strong> Clicks on non-interactive elements. The user thought something was clickable but it wasn't. Often indicates confusing UI.
+      </p>
+
+      <p>
+        <strong>Thrashing:</strong> Rapid scroll direction changes. The user is lost, searching for something they can't find.
+      </p>
+
+      <p>
+        These become queryable structured data. In Elastic, you can ask "show me all users with frustration score above 0.7 in the last hour" and get actual answers.
+      </p>
+
+      <h2>Parent-Child Spans for Business Flows</h2>
+
+      <p>
+        For operations with duration and hierarchy, traces are the right tool. Here's how to create a checkout flow with child spans:
+      </p>
+
+      <pre><code>{`import { trace, context, getTracer } from '@anthropic/session-replay-browser-agent';
+
+const tracer = getTracer();
+
+// Parent span (becomes Transaction in Elastic APM)
+const checkoutSpan = tracer.startSpan('checkout.buy_now');
+
+// Execute child operations within parent context
+context.with(trace.setSpan(context.active(), checkoutSpan), () => {
+  // Child span 1: validate cart
+  const validateSpan = tracer.startSpan('checkout.validate_cart');
+  validateSpan.setAttribute('cart.items', 3);
+  validateSpan.end();
+
+  // Child span 2: process payment
+  const paymentSpan = tracer.startSpan('checkout.process_payment');
+  paymentSpan.setAttribute('payment.method', 'credit_card');
+  // ... payment logic
+  paymentSpan.end();
+
+  // Child span 3: confirm order
+  const confirmSpan = tracer.startSpan('checkout.confirm_order');
+  confirmSpan.end();
+});
+
+checkoutSpan.end();`}</code></pre>
+
+      <p>
+        In Elastic APM, this shows as a Transaction (<code>checkout.buy_now</code>) with child Spans nested underneath. You can see exactly where time was spent.
+      </p>
+
+      <h2>Trace-Log Correlation</h2>
+
+      <p>
+        Here's where it gets powerful. Logs emitted within an active trace context automatically include <code>trace.id</code> and <code>span.id</code>:
+      </p>
+
+      <pre><code>{`// Inside a trace context
+emitSessionEvent({
+  name: 'payment.started',
+  attributes: { 'payment.method': 'credit_card' }
+});
+
+// The log automatically gets:
+// {
+//   "trace.id": "32f9e17f...",
+//   "span.id": "9ac7c0be...",
+//   ...
+// }`}</code></pre>
+
+      <p>
+        This means when you query logs in Elastic, you can jump directly to the related trace. When you're looking at a trace, you can see all the user events that happened during that operation. No manual correlation needed.
+      </p>
+
+      <h2>Using It in Your App</h2>
+
+      <p>
+        Installation:
+      </p>
+
+      <pre><code>{`npm install @anthropic/session-replay-browser-agent`}</code></pre>
+
+      <p>
+        Basic setup:
+      </p>
+
+      <pre><code>{`import {
+  createSessionReplayProvider,
+  createSessionLogProvider,
+  setUser,
+  enableAllInstrumentations
+} from '@anthropic/session-replay-browser-agent';
+
+// Initialize providers
+createSessionReplayProvider({
+  serviceName: 'my-app',
+  endpoint: 'https://your-elastic.cloud:443/v1/traces',
+  apiKey: 'your-api-key',
+});
+
+createSessionLogProvider({
+  serviceName: 'my-app',
+  endpoint: 'https://your-elastic.cloud:443/v1/logs',
+  apiKey: 'your-api-key',
+});
+
+// Set user identity after login
+setUser({
+  id: 'david',
+  email: 'david@example.com',
+  name: 'David Hope'
+});
+
+// Enable automatic instrumentation
+enableAllInstrumentations();`}</code></pre>
+
+      <p>
+        That's it. Clicks, navigation, errors, and frustration signals are now being captured and sent to Elastic.
+      </p>
+
+      <h2>Querying in Elastic</h2>
+
+      <p>
+        ES|QL makes this data immediately useful:
+      </p>
+
+      <pre><code>{`-- All events for a specific user
+FROM logs-generic.otel-default
+| WHERE attributes.user.id == "david"
+| SORT @timestamp ASC
+
+-- Frustrated users in the last hour
+FROM logs-generic.otel-default
+| WHERE attributes.frustration.type IS NOT NULL
+| STATS count = COUNT() BY attributes.user.id
+| SORT count DESC
+
+-- Rage clicks by page
+FROM logs-generic.otel-default
+| WHERE attributes.frustration.type == "rage_click"
+| STATS count = COUNT() BY attributes.page.url
+| SORT count DESC`}</code></pre>
+
+      <p>
+        The data is structured for querying. You can ask questions that would be impossible with video recordings.
+      </p>
+
+      <h2>What's Next: The AI Layer</h2>
+
+      <p>
+        The instrumentation layer is done. The next piece is the AI synthesis: asking "what happened to user David on checkout?" and getting a narrative response that pulls from both logs and traces.
+      </p>
+
+      <p>
+        The data model is ready for this. Session IDs link events together. Trace IDs connect to backend operations. Frustration scores highlight the important moments. An LLM can synthesize this into the story of what actually happened, much faster than watching a video.
+      </p>
+
+      <h2>Try It</h2>
+
+      <p>
+        The code is open source: <a href="https://github.com/davidgeorgehope/sessionreplay">github.com/davidgeorgehope/sessionreplay</a>
+      </p>
+
+      <p>
+        Clone it, point it at your Elastic Cloud instance, and see semantic session events start flowing in. The demo app includes a load test that generates realistic user behavior including frustration signals.
+      </p>
+
+      <p>
+        This is still early. But the core thesis from my last post is holding up: structured semantic events + frustration detection is more useful than DOM recording. And it's privacy-friendly, storage-efficient, and queryable from day one.
+      </p>
+    </div>
+
+    <footer class="post-footer">
+      <a href="/writing">&larr; Back to writing</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .post {
+    padding: 2rem 0;
+    max-width: 640px;
+  }
+
+  header {
+    margin-bottom: 2rem;
+  }
+
+  header time {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  header h1 {
+    margin-top: 0.5rem;
+  }
+
+  .content {
+    line-height: 1.7;
+  }
+
+  .content p {
+    margin-bottom: 1.25rem;
+  }
+
+  .content a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .content h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+  }
+
+  .content ul {
+    margin-bottom: 1.25rem;
+    padding-left: 1.5rem;
+  }
+
+  .content li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+  }
+
+  .content code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--color-surface);
+    padding: 0.15em 0.3em;
+    border-radius: 3px;
+  }
+
+  .content pre {
+    background: var(--color-surface);
+    padding: 1rem;
+    border-radius: 4px;
+    overflow-x: auto;
+    margin-bottom: 1.25rem;
+  }
+
+  .content pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.85rem;
+  }
+
+  .content blockquote {
+    border-left: 3px solid var(--color-border);
+    padding-left: 1rem;
+    margin: 1.25rem 0;
+    color: var(--color-text-muted);
+    font-style: italic;
+  }
+
+  .post-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .post-footer a {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .post-footer a:hover {
+    color: var(--color-text);
+  }
+</style>
