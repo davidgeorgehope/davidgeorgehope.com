@@ -1,0 +1,242 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const title = "Building Vibecaster: AI Social Media Automation in Public";
+const date = "December 2025";
+---
+
+<Base title={`${title} | David George Hope`}>
+  <article class="post">
+    <header>
+      <time>{date}</time>
+      <h1>{title}</h1>
+    </header>
+
+    <div class="content">
+      <p>
+        I built a thing. It's called <a href="https://vibecaster.ai">Vibecaster</a>, and it automatically generates and posts content to X/Twitter and LinkedIn using AI. But this post isn't really about the product—it's about the process. Building in public means showing the messy parts, so here's how it actually came together.
+      </p>
+
+      <h2>The Problem I Was Solving</h2>
+
+      <p>
+        I have opinions about observability, OpenTelemetry, and building things. I should probably share them more. But writing social media posts is tedious. Writing <em>good</em> social media posts that sound like me, reference current events, and include relevant images? That's a time sink I don't have.
+      </p>
+
+      <p>
+        So I did what any reasonable engineer would do: I spent way more time building automation than I would have spent just writing the posts manually.
+      </p>
+
+      <h2>The Architecture</h2>
+
+      <p>
+        Vibecaster runs on a simple stack:
+      </p>
+
+      <ul>
+        <li><strong>Backend:</strong> Python/FastAPI running on a Hetzner VPS</li>
+        <li><strong>Frontend:</strong> Next.js with a cyberpunk aesthetic (because why not)</li>
+        <li><strong>AI:</strong> Google Gemini 3 Pro for everything—content generation, search grounding, image generation</li>
+        <li><strong>Auth:</strong> OAuth 1.0a for Twitter, OAuth 2.0 for LinkedIn</li>
+        <li><strong>Database:</strong> SQLite, because I'm not running a startup here</li>
+      </ul>
+
+      <p>
+        The core idea is simple: you write a prompt describing who you are and what you want to post about. The AI analyzes it, creates a "refined persona," and then uses that persona to generate content daily. It searches the web for recent news in your domain, writes posts in your voice, generates images to match, and posts them automatically.
+      </p>
+
+      <h2>Four Ways to Create Content</h2>
+
+      <p>
+        The app evolved into four distinct modes, each solving a different use case:
+      </p>
+
+      <h3>1. Campaign Mode (Fully Automatic)</h3>
+
+      <p>
+        Set it and forget it. Define your persona, set a schedule, and Vibecaster posts daily without intervention. It uses Gemini's search grounding to find recent news, then generates posts that reference real, current content. No hallucinated URLs—everything gets verified.
+      </p>
+
+      <h3>2. URL Post Mode</h3>
+
+      <p>
+        Found an interesting article? Paste the URL, and Vibecaster generates platform-specific posts (280 chars for X, longer for LinkedIn) plus a matching image. Review, edit if needed, post with one click.
+      </p>
+
+      <h3>3. Post Builder (Chat Interface)</h3>
+
+      <p>
+        This one's interesting. It's a multi-agent chat system where you can have a conversation about what you want to post. The AI searches the web, proposes drafts, iterates based on feedback, and generates images. It feels like having a social media assistant you can actually talk to.
+      </p>
+
+      <h3>4. Transcribe Mode (New)</h3>
+
+      <p>
+        This is the latest addition. Upload an audio or video file, and Gemini transcribes it, generates a summary, and writes a full blog post from the content. No file storage—everything processes in memory and gets discarded immediately. I built this in a single session because Gemini 3's multimodal capabilities are genuinely impressive.
+      </p>
+
+      <h2>The Interesting Technical Bits</h2>
+
+      <h3>Search Grounding Without Hallucination</h3>
+
+      <p>
+        LLMs love to hallucinate URLs. They'll generate something that looks plausible—correct domain, reasonable path structure—but points to a 404. Vibecaster solves this by using Gemini's native search grounding, which returns actual search results with real URLs. Every link gets verified before posting.
+      </p>
+
+      <h3>Streaming Everything</h3>
+
+      <p>
+        Nobody wants to stare at a spinner for 30 seconds. All generation endpoints use Server-Sent Events (SSE) to stream progress in real-time. You see "Searching web... Found 5 results... Generating X post... Generating LinkedIn post... Creating image..." as it happens. Makes the AI feel responsive instead of mysterious.
+      </p>
+
+      <h3>Image Generation That Actually Works</h3>
+
+      <p>
+        Gemini 3's image generation is surprisingly good at creating social media graphics. The trick is giving it a consistent "visual style" prompt that matches your brand. Mine generates cyberpunk-themed images because that's the Vibecaster aesthetic. You can set your own style—"watercolor illustrations" or "minimalist line art" or whatever fits your brand.
+      </p>
+
+      <h3>Multi-User from Day One</h3>
+
+      <p>
+        Even though I built this for myself, I architected it for multiple users from the start. JWT auth, user-scoped database queries, isolated OAuth tokens. Partly because it's good practice, partly because I might let others use it someday.
+      </p>
+
+      <h2>What I Learned</h2>
+
+      <p>
+        <strong>Gemini 3 is genuinely multimodal.</strong> When I added video transcription, I expected it to just extract the audio track. Instead, it understood the video—identifying music, sound effects, even visual context. It transcribed "[Angelic choir music plays]" for a test video. Whisper would have returned nothing.
+      </p>
+
+      <p>
+        <strong>OAuth is still painful.</strong> Twitter's OAuth 1.0a implementation requires cryptographic signatures that make you question your life choices. LinkedIn's OAuth 2.0 is cleaner but has its own quirks around token refresh. I spent more time debugging auth than building features.
+      </p>
+
+      <p>
+        <strong>SQLite is underrated.</strong> For a single-server application, SQLite is perfect. No connection pooling, no separate database server, instant backups (just copy the file). I'll migrate to Postgres if I ever need to scale horizontally, but that day isn't today.
+      </p>
+
+      <p>
+        <strong>Streaming UX matters.</strong> The difference between "wait 20 seconds for a result" and "watch progress happen in real-time" is enormous. SSE is dead simple to implement and makes AI applications feel alive.
+      </p>
+
+      <h2>What's Next</h2>
+
+      <p>
+        Vibecaster is running at <a href="https://vibecaster.ai">vibecaster.ai</a>. I use it daily for my own posting. The code lives on my server, not GitHub—not because it's secret, but because it's messy and I haven't cleaned it up for public consumption.
+      </p>
+
+      <p>
+        Future ideas floating around:
+      </p>
+
+      <ul>
+        <li>Analytics dashboard showing post performance</li>
+        <li>Multiple personas per account</li>
+        <li>Scheduled posts instead of just daily automation</li>
+        <li>Support for more platforms (Bluesky, Threads, Mastodon)</li>
+      </ul>
+
+      <p>
+        But honestly? It solves my problem. I have opinions about observability, and now they get shared without me having to context-switch into "social media mode" every day. That's the whole point.
+      </p>
+
+      <p>
+        Building in public means admitting that most projects exist to scratch a personal itch. This one scratches mine. If it scratches yours too, maybe I'll open it up someday. For now, it's just a thing I built because I could.
+      </p>
+    </div>
+
+    <footer class="post-footer">
+      <a href="/writing">&larr; Back to writing</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .post {
+    padding: 2rem 0;
+    max-width: 640px;
+  }
+
+  header {
+    margin-bottom: 2rem;
+  }
+
+  header time {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  header h1 {
+    margin-top: 0.5rem;
+  }
+
+  .content {
+    line-height: 1.7;
+  }
+
+  .content p {
+    margin-bottom: 1.25rem;
+  }
+
+  .content h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .content h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+  }
+
+  .content ul, .content ol {
+    margin-bottom: 1.25rem;
+    padding-left: 1.5rem;
+  }
+
+  .content li {
+    margin-bottom: 0.5rem;
+  }
+
+  .content a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .content code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--color-border);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+  }
+
+  .content pre {
+    background: #2c2c2c;
+    color: #f0f0f0;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 1.25rem;
+  }
+
+  .content pre code {
+    background: none;
+    padding: 0;
+  }
+
+  .post-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .post-footer a {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .post-footer a:hover {
+    color: var(--color-text);
+  }
+</style>
