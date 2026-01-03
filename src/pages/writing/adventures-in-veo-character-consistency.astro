@@ -1,0 +1,276 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const title = "Adventures in Veo 3.1: Teaching AI to Remember What Characters Look Like";
+const date = "January 2026";
+---
+
+<Base title={`${title} | David George Hope`}>
+  <article class="post">
+    <header>
+      <time>{date}</time>
+      <h1>{title}</h1>
+    </header>
+
+    <div class="content">
+      <p>
+        Here's a problem I didn't expect to spend my Friday night solving: how do you make an AI video generator remember what a cartoon elk looks like across multiple scenes?
+      </p>
+
+      <p>
+        I've been building <a href="https://vibecaster.ai">Vibecaster</a>, which now generates AI videos using Google's Veo 3.1. The videos are surprisingly good—Veo handles dialogue, camera movement, and even generates matching audio. But there's a catch: if you're telling a story with recurring characters, each scene might render them completely differently.
+      </p>
+
+      <h2>The Prompt That Started It All</h2>
+
+      <p>
+        I was experimenting with a test prompt—a cozy New Year's Eve scene with three characters:
+      </p>
+
+      <ul>
+        <li><strong>David:</strong> A 42-year-old British man in a burgundy sweater, sitting in a leather armchair</li>
+        <li><strong>Elky:</strong> A 4-foot cartoon elk mascot with big antlers and a red scarf</li>
+        <li><strong>Loggy:</strong> A 2-foot cartoon wooden log with dot eyes, rosy cheeks, and a green woolly hat</li>
+      </ul>
+
+      <p>
+        The punchline? Loggy is terrified of the roaring fireplace. (He's made of wood. It tracks.)
+      </p>
+
+      <p>
+        The problem: across three scenes, Elky's antlers kept changing shape. Loggy's face drifted between cute and cursed. David somehow gained and lost a beard between cuts. The story was there, but the characters weren't consistent.
+      </p>
+
+      <h2>Enter Reference Images</h2>
+
+      <p>
+        Veo 3.1 has a feature called "reference images"—you can pass up to 3 images to guide the video generation. Google's documentation says it's for maintaining character consistency. Perfect.
+      </p>
+
+      <p>
+        Except there's a catch: reference images and "first-frame" mode are <strong>mutually exclusive</strong>. You can either:
+      </p>
+
+      <ul>
+        <li>Give Veo an image and say "animate this" (first-frame mode)</li>
+        <li>Give Veo reference images and say "include these characters" (ingredients mode)</li>
+      </ul>
+
+      <p>
+        But not both. And we were using first-frame mode because it gives you more control—generate a scene image with Nano Banana Pro (Google's image model), then animate it with Veo. The references would be ignored.
+      </p>
+
+      <h2>The Solution: A Two-Stage Pipeline</h2>
+
+      <p>
+        Here's what we built:
+      </p>
+
+      <pre><code>User Prompt (with character descriptions)
+    ↓
+LLM Analysis → Extract characters + which scenes they appear in
+    ↓
+Nano Banana Pro → Generate reference portrait for EACH character
+    ↓
+Scene 1: Generate image WITH character refs → Veo animates
+    ↓
+Scene 2+: Veo extends previous video + uses character refs</code></pre>
+
+      <p>
+        The key insight: Nano Banana Pro can also use reference images when generating scene images. So we generate character portraits first, then use those portraits as references when generating each scene's first frame. The characters in Scene 1 should match the portraits. Then Veo's video extension chain maintains continuity from there.
+      </p>
+
+      <h2>The Implementation</h2>
+
+      <p>
+        First, we analyze the user's prompt to extract structured character data:
+      </p>
+
+      <pre><code set:html={`{
+  "characters": [
+    {
+      "id": "david",
+      "name": "David",
+      "description": "42yo British man, short brown hair, burgundy sweater...",
+      "style": "storybook_human",
+      "priority": 1
+    },
+    {
+      "id": "elky",
+      "name": "Elky",
+      "description": "4ft cartoon elk, upright, tan fur, big antlers, red scarf...",
+      "style": "pixar_3d",
+      "priority": 2
+    },
+    {
+      "id": "loggy",
+      "name": "Loggy",
+      "description": "2ft cartoon wooden log, bark texture, dot eyes, rosy cheeks...",
+      "style": "pixar_3d",
+      "priority": 3
+    }
+  ],
+  "scene_characters": {
+    "1": ["david", "elky"],
+    "2": ["david", "loggy"],
+    "3": ["david", "loggy"]
+  }
+}`} /></pre>
+
+      <p>
+        Then we generate a reference portrait for each character. The LLM detected that David is a stylized human while Elky and Loggy are Pixar-style 3D mascots—so each gets appropriate style prompts.
+      </p>
+
+      <p>
+        When generating each scene, we pass only the relevant character references. Scene 1 gets David and Elky. Scenes 2 and 3 get David and Loggy. Veo's limit is 3 references per call, but we can have unlimited characters total—different combinations per scene.
+      </p>
+
+      <h2>The Fun Part: Mixed Styles</h2>
+
+      <p>
+        What makes this interesting is mixed-style scenes. David is a semi-realistic human. Elky and Loggy are cartoon mascots. They need to coexist in the same frame without looking like a bad Photoshop composite.
+      </p>
+
+      <p>
+        The trick is the "global style" hint. We tell both Nano Banana and Veo that this is a "storybook" aesthetic—warm lighting, slightly painterly quality. David gets rendered in a Pixar-adjacent style that matches the mascots. Everyone lives in the same visual universe.
+      </p>
+
+      <h2>What I Learned</h2>
+
+      <p>
+        <strong>LLMs are surprisingly good at structured extraction.</strong> Give Gemini a messy prompt with character descriptions scattered throughout, ask for JSON output, and it reliably pulls out the right data. The "which characters appear in which scene" detection worked on the first try.
+      </p>
+
+      <p>
+        <strong>Video extension is the primary consistency mechanism.</strong> Reference images help guide generation, but the real magic is that each scene literally extends from the previous video's last frames. The characters are already on screen—they just need to keep doing things.
+      </p>
+
+      <p>
+        <strong>API limitations force creative solutions.</strong> The mutual exclusivity between first-frame and reference modes seemed like a blocker. But using references at the image generation stage (Nano Banana) instead of the video stage (Veo) works around it cleanly.
+      </p>
+
+      <h2>The Expensive Mistake</h2>
+
+      <p>
+        When testing, I accidentally ran the full integration test suite instead of just the unit tests. Four Veo video generations, several image generations, all hitting real APIs. Lesson learned: <code>pytest -m "not integration"</code> exists for a reason.
+      </p>
+
+      <p>
+        At least the tests passed.
+      </p>
+
+      <h2>What's Next</h2>
+
+      <p>
+        The multi-character reference system is live on Vibecaster. The next obvious feature is letting users upload their own reference images—skip the portrait generation and just say "this is what my character looks like."
+      </p>
+
+      <p>
+        But for now, I'm just happy that Elky's antlers stay the same shape throughout the video. It's the little things.
+      </p>
+
+      <p>
+        <em>Built live with Claude Code at 2 AM because apparently that's when I do my best work.</em>
+      </p>
+    </div>
+
+    <footer class="post-footer">
+      <a href="/writing">&larr; Back to writing</a>
+    </footer>
+  </article>
+</Base>
+
+<style>
+  .post {
+    padding: 2rem 0;
+    max-width: 640px;
+  }
+
+  header {
+    margin-bottom: 2rem;
+  }
+
+  header time {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  header h1 {
+    margin-top: 0.5rem;
+  }
+
+  .content {
+    line-height: 1.7;
+  }
+
+  .content p {
+    margin-bottom: 1.25rem;
+  }
+
+  .content h2 {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+  }
+
+  .content h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    font-size: 1.1rem;
+  }
+
+  .content ul, .content ol {
+    margin-bottom: 1.25rem;
+    padding-left: 1.5rem;
+  }
+
+  .content li {
+    margin-bottom: 0.5rem;
+  }
+
+  .content a {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+
+  .content code {
+    font-family: var(--font-mono);
+    font-size: 0.9em;
+    background: var(--color-border);
+    padding: 0.1em 0.3em;
+    border-radius: 3px;
+  }
+
+  .content pre {
+    background: #2c2c2c;
+    color: #f0f0f0;
+    padding: 1rem;
+    border-radius: 6px;
+    overflow-x: auto;
+    margin-bottom: 1.25rem;
+  }
+
+  .content pre code {
+    background: none;
+    padding: 0;
+  }
+
+  .content em {
+    font-style: italic;
+    color: var(--color-text-muted);
+  }
+
+  .post-footer {
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .post-footer a {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+  }
+
+  .post-footer a:hover {
+    color: var(--color-text);
+  }
+</style>
