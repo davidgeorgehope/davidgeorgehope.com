@@ -1,5 +1,33 @@
 [
   {
+    "title": "Vibecaster",
+    "description": "AI-powered social media automation. Generate and post content to X, LinkedIn, and YouTube automatically using Google Gemini.",
+    "url": "https://vibecaster.ai",
+    "tags": ["AI", "SaaS", "Social Media"],
+    "featured": true
+  },
+  {
+    "title": "LiveLabs",
+    "description": "Guided hands-on learning on real SaaS products. Learn by doing practical exercises on actual software applications.",
+    "url": "https://livelabs.cc",
+    "tags": ["Education", "SaaS"],
+    "featured": true
+  },
+  {
+    "title": "Best Wishes",
+    "description": "AI-powered greeting card generation. Create personalized cards automatically using artificial intelligence.",
+    "url": "https://bestwishes.love",
+    "tags": ["AI", "Consumer"],
+    "featured": true
+  },
+  {
+    "title": "CompIntels",
+    "description": "AI-powered competitive intelligence. Generate battlecards, analyze win/loss performance, and monitor competitor activity.",
+    "url": "https://compintels.com",
+    "tags": ["AI", "SaaS", "Sales"],
+    "featured": true
+  },
+  {
     "title": "OpenTelemetry Demo Generator",
     "description": "Generate realistic telemetry data for demos and testing observability pipelines.",
     "url": "https://github.com/davidgeorgehope/otel-demo-gen",

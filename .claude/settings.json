@@ -3,7 +3,12 @@
     "PostToolUse": [
       {
         "matcher": "Edit|Write",
-        "command": ".claude/hooks/validate-urls.sh"
+        "hooks": [
+          {
+            "type": "command",
+            "command": ".claude/hooks/validate-urls.sh"
+          }
+        ]
       }
     ]
   }
