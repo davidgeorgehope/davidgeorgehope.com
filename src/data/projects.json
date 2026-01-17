@@ -1,21 +1,21 @@
 [
   {
     "title": "Vibecaster",
-    "description": "AI-powered social media automation. Generate and post content to X, LinkedIn, and YouTube automatically using Google Gemini.",
+    "description": "AI social media automation. Generate and post to X, LinkedIn, and YouTube using Google Gemini.",
     "url": "https://vibecaster.ai",
     "tags": ["AI", "SaaS", "Social Media"],
     "featured": true
   },
   {
     "title": "LiveLabs",
-    "description": "Guided hands-on learning on real SaaS products. Learn by doing practical exercises on actual software applications.",
+    "description": "Guided hands-on labs on real SaaS products. Learn by doing, not watching.",
     "url": "https://livelabs.cc",
     "tags": ["Education", "SaaS"],
     "featured": true
   },
   {
     "title": "Best Wishes",
-    "description": "AI-powered greeting card generation. Create personalized cards automatically using artificial intelligence.",
+    "description": "AI greeting card generation. Create personalized cards from a prompt.",
     "url": "https://bestwishes.love",
     "tags": ["AI", "Consumer"],
     "featured": true

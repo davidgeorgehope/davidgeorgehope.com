@@ -54,7 +54,7 @@ const date = "December 2025";
       <h3>1. Campaign Mode (Fully Automatic)</h3>
 
       <p>
-        Set it and forget it. Define your persona, set a schedule, and Vibecaster posts daily without intervention. It uses Gemini's search grounding to find recent news, then generates posts that reference real, current content. No hallucinated URLs—everything gets verified.
+        Define your persona, set a schedule, Vibecaster posts daily. It uses Gemini's search grounding to find recent news, then generates posts that reference real, current content. No hallucinated URLs—everything gets verified.
       </p>
 
       <h3>2. URL Post Mode</h3>
@@ -66,13 +66,13 @@ const date = "December 2025";
       <h3>3. Post Builder (Chat Interface)</h3>
 
       <p>
-        This one's interesting. It's a multi-agent chat system where you can have a conversation about what you want to post. The AI searches the web, proposes drafts, iterates based on feedback, and generates images. It feels like having a social media assistant you can actually talk to.
+        A multi-agent chat system. Have a conversation about what you want to post. The AI searches the web, proposes drafts, iterates based on feedback, generates images.
       </p>
 
       <h3>4. Transcribe Mode (New)</h3>
 
       <p>
-        This is the latest addition. Upload an audio or video file, and Gemini transcribes it, generates a summary, and writes a full blog post from the content. No file storage—everything processes in memory and gets discarded immediately. I built this in a single session because Gemini 3's multimodal capabilities are genuinely impressive.
+        Upload an audio or video file. Gemini transcribes it, generates a summary, writes a blog post. No file storage—everything processes in memory and gets discarded. Built in a single session.
       </p>
 
       <h2>The Interesting Technical Bits</h2>
@@ -104,7 +104,7 @@ const date = "December 2025";
       <h2>What I Learned</h2>
 
       <p>
-        <strong>Gemini 3 is genuinely multimodal.</strong> When I added video transcription, I expected it to just extract the audio track. Instead, it understood the video—identifying music, sound effects, even visual context. It transcribed "[Angelic choir music plays]" for a test video. Whisper would have returned nothing.
+        <strong>Gemini 3 is multimodal.</strong> When I added video transcription, I expected it to extract the audio track. Instead, it understood the video—music, sound effects, visual context. It transcribed "[Angelic choir music plays]" for a test video. Whisper would have returned nothing.
       </p>
 
       <p>
@@ -116,7 +116,7 @@ const date = "December 2025";
       </p>
 
       <p>
-        <strong>Streaming UX matters.</strong> The difference between "wait 20 seconds for a result" and "watch progress happen in real-time" is enormous. SSE is dead simple to implement and makes AI applications feel alive.
+        <strong>Streaming UX matters.</strong> The gap between "wait 20 seconds" and "watch progress in real-time" is large. SSE is simple to implement and makes AI applications feel responsive.
       </p>
 
       <h2>What's Next</h2>

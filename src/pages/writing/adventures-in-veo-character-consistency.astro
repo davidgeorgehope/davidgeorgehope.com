@@ -21,10 +21,10 @@ const date = "January 2026";
         I've been building <a href="https://vibecaster.ai">Vibecaster</a>, which now generates AI videos using Google's Veo 3.1. The videos are surprisingly good—Veo handles dialogue, camera movement, and even generates matching audio. But there's a catch: if you're telling a story with recurring characters, each scene might render them completely differently.
       </p>
 
-      <h2>The Prompt That Started It All</h2>
+      <h2>The Test Prompt</h2>
 
       <p>
-        I was experimenting with a test prompt—a cozy New Year's Eve scene with three characters:
+        A cozy New Year's Eve scene with three characters:
       </p>
 
       <ul>
@@ -41,10 +41,10 @@ const date = "January 2026";
         The problem: across three scenes, Elky's antlers kept changing shape. Loggy's face drifted between cute and cursed. David somehow gained and lost a beard between cuts. The story was there, but the characters weren't consistent.
       </p>
 
-      <h2>Enter Reference Images</h2>
+      <h2>Reference Images</h2>
 
       <p>
-        Veo 3.1 has a feature called "reference images"—you can pass up to 3 images to guide the video generation. Google's documentation says it's for maintaining character consistency. Perfect.
+        Veo 3.1 lets you pass up to 3 reference images to guide video generation. Google's documentation says it's for character consistency.
       </p>
 
       <p>
@@ -77,7 +77,7 @@ Scene 1: Generate image WITH character refs → Veo animates
 Scene 2+: Veo extends previous video + uses character refs</code></pre>
 
       <p>
-        The key insight: Nano Banana Pro can also use reference images when generating scene images. So we generate character portraits first, then use those portraits as references when generating each scene's first frame. The characters in Scene 1 should match the portraits. Then Veo's video extension chain maintains continuity from there.
+        Nano Banana Pro can also use reference images when generating scene images. Generate character portraits first, use those as references when generating each scene's first frame. Scene 1 characters match the portraits. Veo's video extension chain maintains continuity from there.
       </p>
 
       <h2>The Implementation</h2>
@@ -138,15 +138,15 @@ Scene 2+: Veo extends previous video + uses character refs</code></pre>
       <h2>What I Learned</h2>
 
       <p>
-        <strong>LLMs are surprisingly good at structured extraction.</strong> Give Gemini a messy prompt with character descriptions scattered throughout, ask for JSON output, and it reliably pulls out the right data. The "which characters appear in which scene" detection worked on the first try.
+        <strong>LLMs handle structured extraction well.</strong> Give Gemini a messy prompt with character descriptions scattered throughout, ask for JSON output, and it reliably pulls out the right data. The "which characters appear in which scene" detection worked on the first try.
       </p>
 
       <p>
-        <strong>Video extension is the primary consistency mechanism.</strong> Reference images help guide generation, but the real magic is that each scene literally extends from the previous video's last frames. The characters are already on screen—they just need to keep doing things.
+        <strong>Video extension is the primary consistency mechanism.</strong> Reference images help guide generation, but each scene extends from the previous video's last frames. The characters are already on screen—they just keep doing things.
       </p>
 
       <p>
-        <strong>API limitations force creative solutions.</strong> The mutual exclusivity between first-frame and reference modes seemed like a blocker. But using references at the image generation stage (Nano Banana) instead of the video stage (Veo) works around it cleanly.
+        <strong>API limitations force creative solutions.</strong> The mutual exclusivity between first-frame and reference modes seemed like a blocker. Using references at image generation (Nano Banana) instead of video generation (Veo) works around it.
       </p>
 
       <h2>The Expensive Mistake</h2>

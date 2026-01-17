@@ -18,17 +18,17 @@ const date = "December 2025";
       </p>
 
       <p>
-        Not broken. <em>Wrong</em>. The URLs looked plausible. They followed Elastic's URL patterns. They just didn't exist. Claude had hallucinated them.
+        The URLs looked plausible. They followed Elastic's URL patterns. They just didn't exist. Claude had hallucinated them.
       </p>
 
       <p>
         This is a known problem with LLMs, but it's particularly annoying with URLs because they're so easy to get wrong and so hard to notice. A hallucinated URL looks exactly like a real one until you click it and get a 404.
       </p>
 
-      <h2>The Problem</h2>
+      <h2>What Went Wrong</h2>
 
       <p>
-        Here's what happened. I asked Claude Code (the CLI tool I use for development) to create a page listing my Elastic blog posts. Claude knew I had written articles. It even knew the titles. But it didn't have the actual URLs—so it generated plausible-looking ones based on patterns it had seen in training data.
+        I asked Claude Code to create a page listing my Elastic blog posts. Claude knew I had written articles. It even knew the titles. But it didn't have the actual URLs, so it generated plausible-looking ones based on patterns from training data.
       </p>
 
       <p>
@@ -39,10 +39,10 @@ const date = "December 2025";
         The frustrating part: Claude has web search. It could have looked up the real URLs. But the model generates tokens probabilistically—it doesn't "know" when it's making up a URL versus remembering one. It just predicts the next token based on context.
       </p>
 
-      <h2>Why This Is Architecturally Interesting</h2>
+      <h2>The Architectural Problem</h2>
 
       <p>
-        I started thinking about fixes. The obvious one—validate URLs after generation—has a problem: the output still routes through the LLM. Even if you validate and tell the model "that URL is wrong," it might hallucinate a different wrong URL in response.
+        The obvious fix—validate URLs after generation—has a problem: the output still routes through the LLM. Even if you validate and tell the model "that URL is wrong," it might hallucinate a different wrong URL in response.
       </p>
 
       <p>
@@ -50,7 +50,7 @@ const date = "December 2025";
       </p>
 
       <p>
-        There are a few architectural approaches that actually work:
+        A few architectural approaches work:
       </p>
 
       <ol>
@@ -74,7 +74,7 @@ const date = "December 2025";
       </p>
 
       <p>
-        The key insight: the validation doesn't re-inject into the model's generation. It just blocks the bad output and provides feedback. The model then has to do the work of finding correct URLs—which it's actually good at when forced to search.
+        The validation doesn't re-inject into the model's generation. It blocks bad output and provides feedback. The model then has to find correct URLs, which it can do when forced to search.
       </p>
 
       <pre><code># The hook validates URLs in .html, .astro, .md files
@@ -99,14 +99,14 @@ fi</code></pre>
         It's not perfect. The hook runs after generation, so there's still wasted work. A better solution would enforce URL sourcing upfront—requiring the model to search before including any external link. But this catches the problem, and catching it is most of the battle.
       </p>
 
-      <h2>The Broader Point</h2>
+      <h2>The Takeaway</h2>
 
       <p>
-        LLMs are good at a lot of things, but factual retrieval of arbitrary strings isn't one of them. URLs, phone numbers, API keys, specific version numbers—anything that's essentially a random string with no semantic structure—is going to be unreliable.
+        LLMs are good at many things, but retrieving arbitrary strings isn't one of them. URLs, phone numbers, API keys, version numbers—anything without semantic structure—will be unreliable.
       </p>
 
       <p>
-        The fix isn't to hope the model gets better at memorizing. It's to architect around the limitation: use structured references, enforce validation, separate generation from retrieval.
+        Don't wait for the model to get better at memorizing. Architect around the limitation: structured references, validation, separation of generation from retrieval.
       </p>
 
       <p>
@@ -139,7 +139,7 @@ fi</code></pre>
       </p>
 
       <p>
-        The nice thing about hooks is they run automatically. You don't have to remember to validate—the tool does it for you. Which is exactly how guardrails should work.
+        Hooks run automatically. You don't have to remember to validate. That's how guardrails should work.
       </p>
     </div>
 

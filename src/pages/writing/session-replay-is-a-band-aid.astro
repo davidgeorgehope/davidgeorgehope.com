@@ -18,7 +18,7 @@ const date = "December 2025";
       </p>
 
       <p>
-        But after years of working with observability tools, I've come to believe session replay is solving the right problem with the wrong approach. It's a band-aid on a deeper architectural gap. And now that we have AI, we can do something fundamentally better.
+        But session replay solves the right problem with the wrong approach. It's a band-aid on a deeper architectural gap. With AI, we can do something better.
       </p>
 
       <h2>The Problem Session Replay Tries to Solve</h2>
@@ -36,13 +36,13 @@ const date = "December 2025";
       </p>
 
       <p>
-        Session replay promises to fill this gap. Record the DOM, capture mouse movements, replay it all later. See what the user saw. Problem solved, right?
+        Session replay promises to fill this gap. Record the DOM, capture mouse movements, replay it all later. See what the user saw.
       </p>
 
       <h2>Why It's a Band-Aid</h2>
 
       <p>
-        Session replay works by recording DOM mutations and reconstructing a video-like playback. It captures <em>pixels</em>, not <em>meaning</em>. And that distinction matters more than it seems.
+        Session replay works by recording DOM mutations and reconstructing a video-like playback. It captures pixels, not meaning.
       </p>
 
       <p>
@@ -65,14 +65,14 @@ const date = "December 2025";
         <strong>It's siloed from your APM.</strong> The recording shows what happened on the frontend, but it doesn't connect to your backend traces. You see the user click a button, but correlating that to the specific API call, the database query, the error in your logs—that's manual detective work.
       </p>
 
-      <h2>What Would "Better" Look Like?</h2>
+      <h2>A Different Approach</h2>
 
       <p>
-        Here's the question I've been thinking about: now that we have AI, what would we build if we were starting from scratch?
+        Now that we have AI, what would we build if we were starting from scratch?
       </p>
 
       <p>
-        The insight is that we don't actually need video. We need <em>understanding</em>. Instead of recording DOM mutations, what if we captured semantically rich events and let AI synthesize the story?
+        We don't need video. We need understanding. Instead of recording DOM mutations, capture semantically rich events and let AI synthesize the story.
       </p>
 
       <p>
@@ -136,15 +136,15 @@ const date = "December 2025";
       <h2>Why OTLP and Elastic?</h2>
 
       <p>
-        Here's where it gets practical. This approach works naturally with OpenTelemetry and existing APM infrastructure.
+        This approach works naturally with OpenTelemetry and existing APM infrastructure.
       </p>
 
       <p>
-        OTLP (OpenTelemetry Protocol) already supports traces, metrics, and logs. Frontend events are just another signal type. You instrument the browser with OTEL's browser SDK plus custom semantic instrumentation, send via OTLP, and land in Elastic alongside your backend traces.
+        OTLP already supports traces, metrics, and logs. Frontend events are just another signal type. Instrument the browser with OTEL's browser SDK plus custom semantic instrumentation, send via OTLP, and land in Elastic alongside your backend traces.
       </p>
 
       <p>
-        The magic: that <code>trace_id</code> field connects the frontend interaction to the backend request. When AI narrates "the Stripe API returned 402," it's pulling that from the linked backend span. No manual correlation needed.
+        That <code>trace_id</code> field connects the frontend interaction to the backend request. When AI narrates "the Stripe API returned 402," it's pulling that from the linked backend span. No manual correlation.
       </p>
 
       <p>
@@ -165,22 +165,22 @@ const date = "December 2025";
         I'll write more as this progresses. Building in public, as they say.
       </p>
 
-      <h2>The Bigger Point</h2>
+      <h2>Why This Matters</h2>
 
       <p>
-        Session replay was a clever solution for its time. When you couldn't understand what users experienced, recording everything and playing it back was better than nothing.
+        Session replay was a reasonable solution when you couldn't understand what users experienced. Recording everything and playing it back was better than nothing.
       </p>
 
       <p>
-        But "record everything" is a brute-force approach. It trades storage and privacy for visibility. It gives you data but not understanding.
+        But "record everything" is brute force. It trades storage and privacy for visibility. It gives you data, not understanding.
       </p>
 
       <p>
-        With AI, we can be smarter. Capture meaning. Let the AI synthesize. Ask questions instead of watching video. Connect frontend to backend through traces, not screenshots.
+        Capture meaning instead. Let AI synthesize. Ask questions instead of watching video. Connect frontend to backend through traces.
       </p>
 
       <p>
-        That's not an incremental improvement on session replay. It's a different architecture for the same problem. And I think it's the right one.
+        That's a different architecture for the same problem.
       </p>
     </div>
 

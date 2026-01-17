@@ -18,7 +18,7 @@ const date = "December 2025";
       </p>
 
       <p>
-        I've now built the first version. Here's how it works, what I learned, and how you can use it.
+        I've built the first version. Here's how it works.
       </p>
 
       <p>
@@ -28,7 +28,7 @@ const date = "December 2025";
       <h2>The Architecture: Logs + Traces</h2>
 
       <p>
-        The key insight is using <em>two complementary OTLP signals</em>:
+        Two complementary OTLP signals:
       </p>
 
       <ul>
@@ -65,7 +65,7 @@ const date = "December 2025";
 }`}</code></pre>
 
       <p>
-        Notice <code>target.semantic_name</code>. That's the key difference from traditional session replay. Instead of "click at coordinates (342, 891)", we capture "Submit Order button". Meaning, not pixels.
+        Notice <code>target.semantic_name</code>. Instead of "click at coordinates (342, 891)", we capture "Submit Order button". Meaning, not pixels.
       </p>
 
       <h2>Frustration Detection</h2>
@@ -141,7 +141,7 @@ checkoutSpan.end();`}</code></pre>
       <h2>Trace-Log Correlation</h2>
 
       <p>
-        Here's where it gets powerful. Logs emitted within an active trace context automatically include <code>trace.id</code> and <code>span.id</code>:
+        Logs emitted within an active trace context automatically include <code>trace.id</code> and <code>span.id</code>:
       </p>
 
       <pre><code>{`// Inside a trace context
@@ -237,11 +237,11 @@ FROM logs-generic.otel-default
       <h2>What's Next: The AI Layer</h2>
 
       <p>
-        The instrumentation layer is done. The next piece is the AI synthesis: asking "what happened to user David on checkout?" and getting a narrative response that pulls from both logs and traces.
+        The instrumentation layer is done. Next: AI synthesis. Ask "what happened to user David on checkout?" and get a narrative that pulls from logs and traces.
       </p>
 
       <p>
-        The data model is ready for this. Session IDs link events together. Trace IDs connect to backend operations. Frustration scores highlight the important moments. An LLM can synthesize this into the story of what actually happened, much faster than watching a video.
+        Session IDs link events together. Trace IDs connect to backend operations. Frustration scores highlight important moments. An LLM can synthesize this into a story of what happened, faster than watching video.
       </p>
 
       <h2>Try It</h2>
