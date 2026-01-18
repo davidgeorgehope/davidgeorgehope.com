@@ -8,6 +8,10 @@ const {
   title = "David George Hope",
   description = "Director of Product Marketing for Observability at Elastic. Builder of things."
 } = Astro.props;
+
+// Get current path for Markdown alternate link
+const currentPath = Astro.url.pathname;
+const mdPath = currentPath === '/' ? '/index.md' : currentPath.replace(/\/$/, '') + '.md';
 ---
 
 <!DOCTYPE html>
@@ -17,6 +21,7 @@ const {
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" type="text/markdown" href={mdPath} title="Markdown version" />
     <title>{title}</title>
   </head>
   <body>
