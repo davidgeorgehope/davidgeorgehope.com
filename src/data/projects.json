@@ -28,6 +28,20 @@
     "featured": true
   },
   {
+    "title": "Alert Fatigue",
+    "description": "Interactive demo showing how AI-powered log analysis solves the 3am incident response problem.",
+    "url": "https://alertfatigue.fail",
+    "tags": ["Observability", "AI", "Demo"],
+    "featured": true
+  },
+  {
+    "title": "Observability Comparison",
+    "description": "Comprehensive comparison of observability platforms including Elastic, Datadog, Dynatrace, Splunk, and more.",
+    "url": "https://observabilitycomparison.com",
+    "tags": ["Observability", "Guide"],
+    "featured": true
+  },
+  {
     "title": "OpenTelemetry Demo Generator",
     "description": "Generate realistic telemetry data for demos and testing observability pipelines.",
     "url": "https://github.com/davidgeorgehope/otel-demo-gen",
