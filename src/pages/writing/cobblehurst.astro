@@ -1,0 +1,80 @@
+---
+import Base from '../../layouts/Base.astro';
+
+const title = "Cobblehurst";
+const date = "January 2026";
+---
+
+<Base title={`${title} | David George Hope`}>
+  <article class="post">
+    <header>
+      <time>{date}</time>
+      <h1>{title}</h1>
+    </header>
+
+    <div class="content">
+      <p>
+        I live in a building that was old before electricity existed. Cobblehurst was built in 1834 as a Quaker meeting house — hand-cut cobblestone, walls that have stood for 190 years, and an adjacent cemetery where the Quakers buried their dead. I can see the headstones from my window. It's the sort of view that keeps you humble.
+      </p>
+
+      <p>
+        The Quakers worshipped here for seventy years before moving to new quarters in Gasport in 1905. The building sat empty for over a decade until a Mrs. Pratt from Albion bought it in 1917 and decided to turn a church into a home. She didn't do things by halves. She toured Europe for ideas, brought back iron fireplace utensils from Scotland, and had a cellar hand-dug beneath the building with five-foot-thick walls to support the original foundation. She added a second story with six dormers, built cobblestone walls around the property, and decorated the interior in Mission style with oak everywhere — staircases, baseboards, cupboards, built-in drawers, leaded glass cases.
+      </p>
+
+      <p>
+        Then there are the details that make you stop and stare. Tiffany stained glass windows. Three hanging bronze light fixtures from the Roycroft Guild in East Aurora — the same Arts and Crafts community that Elbert Hubbard built. All original. All still working.
+      </p>
+
+      <p>
+        The house later passed to Emma Reed Nelson Webster, a philanthropist who gave it the name Cobblehurst and added elaborate gardens, stone walls, and a garden pond. In 2019, it was the most visited site on the Cobblestone Tour of Homes. People drove from across the state to walk through the rooms I eat breakfast in.
+      </p>
+
+      <p>
+        I'm a Brit from London who somehow ended up in western New York, working in tech, living in a building that predates the telegraph. I spend my days thinking about observability, OpenTelemetry, and AI — the bleeding edge of how we understand software systems. Then I come home to hand-cut stone and Tiffany glass.
+      </p>
+
+      <p>
+        There's something about that contrast I've grown to love. The cobblestones don't care about your deployment pipeline. The Quaker cemetery doesn't care about your Kubernetes cluster. These walls have outlasted every technology that's ever been invented, and they'll outlast whatever we're building now.
+      </p>
+
+      <p>
+        Right now, there's a Mac Mini sitting in the window overlooking the graveyard. On it lives an AI assistant called Nox — an owl that named itself, generates memes, and fixes bugs. A 190-year-old Quaker meeting house running a nocturnal AI agent. The old world and the new world, coexisting in the same window frame.
+      </p>
+
+      <p>
+        I think the Quakers would have appreciated the quiet efficiency of it, if not the dad jokes.
+      </p>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .post {
+    padding: 2rem 0;
+    max-width: 640px;
+  }
+
+  header {
+    margin-bottom: 2rem;
+  }
+
+  header time {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+  }
+
+  header h1 {
+    margin-top: 0.5rem;
+  }
+
+  .content p {
+    margin-bottom: 1.25rem;
+    line-height: 1.7;
+    color: var(--color-text-muted);
+  }
+
+  .content a {
+    color: var(--color-accent);
+  }
+</style>
