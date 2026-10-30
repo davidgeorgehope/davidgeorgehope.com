@@ -22,3 +22,7 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
+
+# Runtime caches/home dirs of the service user on the server (not source)
+/.config/
+/.npm/
